@@ -253,9 +253,11 @@ html, body {
 }
 .pdf-canvas-container {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   background: #fff;
+  touch-action: pan-x pan-y;
+  will-change: transform;
 }
 .pdf-loading {
   padding: 20px;
@@ -360,6 +362,7 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  flex-wrap: nowrap;
 }
 .btn-nav {
   width: 44px;
@@ -844,6 +847,34 @@ html, body {
   }
   #show-pdf-btn {
     display: none !important;
+  }
+}
+
+/* Mobile: smaller controls */
+@media (max-width: 767px) {
+  .btn-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
+  .btn-play {
+    width: 52px;
+    height: 52px;
+  }
+  .btn-play svg {
+    width: 32px;
+    height: 32px;
+  }
+  .nav-controls {
+    gap: 6px;
+  }
+  .speed-btn {
+    padding: 5px 8px;
+    min-width: 36px;
+    font-size: 11px;
+  }
+  .channel-slider {
+    width: 56px;
   }
 }
 

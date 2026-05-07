@@ -28,6 +28,7 @@
   let pendingAddAfterIndex = null;
   let activeTag = null;
   let searchQuery = '';
+  let pendingPdfUrl = null; // deferred PDF.js render for mobile
 
   // Handle drag state for section edges on the timeline
   let dragState = null; // { sectionIndex, edge: 'start'|'end' }
@@ -306,6 +307,8 @@
     if (gainR) gainR.gain.value = rVal;
 
     // PDF setup
+    pendingPdfUrl = null;
+    pdfPanel.classList.remove('mobile-show');
     if (song.pdf) {
       const pdfUrl = song.folder + '/' + song.pdf;
       if (window.innerWidth >= 768) {
@@ -315,12 +318,12 @@
         pdfCanvasContainer.style.display = 'none';
         pdfPanel.style.display = '';
       } else {
-        // Mobile: use PDF.js canvas rendering
+        // Mobile: defer PDF.js rendering until panel is visible
         pdfViewer.src = '';
         pdfViewer.style.display = 'none';
         pdfCanvasContainer.style.display = '';
-        renderPdfMobile(pdfUrl);
-        // Panel stays hidden until user taps "Show"
+        pdfCanvasContainer.innerHTML = '';
+        pendingPdfUrl = pdfUrl;
       }
       showPdfBtn.style.display = '';
       showPdfBtn.textContent = 'Show Sheet Music (PDF)';
@@ -330,7 +333,6 @@
       pdfCanvasContainer.style.display = 'none';
       showPdfBtn.style.display = 'none';
       pdfPanel.style.display = 'none';
-      pdfPanel.classList.remove('mobile-show');
     }
 
     // Lyrics: fetch the .txt file if listed in songs.json
@@ -475,6 +477,104 @@
     } finally {
       pdfLoading.style.display = 'none';
     }
+  }
+
+  // ---- PDF Pinch-to-Zoom (mobile) ----
+  function setupPdfPinchZoom() {
+    let currentScale = 1;
+    let originX = 0;
+    let originY = 0;
+    let startDist = 0;
+    let startScale = 1;
+    let isPinching = false;
+    // For panning while zoomed
+    let panX = 0, panY = 0, panStartX = 0, panStartY = 0, startPanX = 0, startPanY = 0;
+
+    function dist(t1, t2) {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function applyTransform() {
+      const inner = pdfCanvasContainer.firstElementChild ? pdfCanvasContainer : null;
+      if (!inner) return;
+      // Apply to all canvases via a wrapper approach — use container's own scroll + transform
+      pdfCanvasContainer.style.transformOrigin = originX + 'px ' + originY + 'px';
+      pdfCanvasContainer.style.transform =
+        'translate(' + panX + 'px, ' + panY + 'px) scale(' + currentScale + ')';
+    }
+
+    pdfCanvasContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        isPinching = true;
+        startDist = dist(e.touches[0], e.touches[1]);
+        startScale = currentScale;
+        const rect = pdfCanvasContainer.getBoundingClientRect();
+        originX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left + pdfCanvasContainer.scrollLeft;
+        originY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top + pdfCanvasContainer.scrollTop;
+        startPanX = panX;
+        startPanY = panY;
+        panStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        panStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    pdfCanvasContainer.addEventListener('touchmove', (e) => {
+      if (isPinching && e.touches.length === 2) {
+        const d = dist(e.touches[0], e.touches[1]);
+        currentScale = Math.max(1, Math.min(5, startScale * (d / startDist)));
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        panX = startPanX + (midX - panStartX);
+        panY = startPanY + (midY - panStartY);
+        applyTransform();
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    pdfCanvasContainer.addEventListener('touchend', (e) => {
+      if (isPinching) {
+        isPinching = false;
+        // Snap back if near 1×
+        if (currentScale < 1.1) {
+          currentScale = 1;
+          panX = 0;
+          panY = 0;
+          pdfCanvasContainer.style.transform = '';
+          pdfCanvasContainer.style.transformOrigin = '';
+        }
+      }
+    });
+
+    // Double-tap to reset zoom
+    let lastTap = 0;
+    pdfCanvasContainer.addEventListener('touchend', (e) => {
+      if (e.touches.length > 0) return;
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        if (currentScale > 1.05) {
+          // Reset
+          currentScale = 1;
+          panX = 0;
+          panY = 0;
+          pdfCanvasContainer.style.transform = '';
+          pdfCanvasContainer.style.transformOrigin = '';
+        } else {
+          // Zoom to 2.5× at tap point
+          currentScale = 2.5;
+          const rect = pdfCanvasContainer.getBoundingClientRect();
+          const touch = e.changedTouches[0];
+          originX = touch.clientX - rect.left + pdfCanvasContainer.scrollLeft;
+          originY = touch.clientY - rect.top + pdfCanvasContainer.scrollTop;
+          panX = 0;
+          panY = 0;
+          applyTransform();
+        }
+      }
+      lastTap = now;
+    });
   }
 
   // ---- Timeline Drawing ----
@@ -1128,10 +1228,19 @@
 
     // Mobile PDF toggle
     showPdfBtn.addEventListener('click', () => {
+      const wasShowing = pdfPanel.classList.contains('mobile-show');
       pdfPanel.classList.toggle('mobile-show');
-      showPdfBtn.textContent = pdfPanel.classList.contains('mobile-show')
+      showPdfBtn.textContent = !wasShowing
         ? 'Hide Sheet Music'
         : 'Show Sheet Music (PDF)';
+
+      // Render PDF.js on first show (deferred so container has layout width)
+      if (!wasShowing && pendingPdfUrl) {
+        const url = pendingPdfUrl;
+        pendingPdfUrl = null;
+        // Use rAF to ensure the panel is laid out before measuring width
+        requestAnimationFrame(() => renderPdfMobile(url));
+      }
     });
 
     window.addEventListener('resize', () => {
@@ -1142,6 +1251,7 @@
     setupTimeline();
     setupDivider();
     setupKeyboard();
+    setupPdfPinchZoom();
   }
 
   // ---- Boot ----
