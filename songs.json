@@ -1,0 +1,15 @@
+{
+  "songs": [
+    {
+      "name": "Champagnegaloppen",
+      "folder": "songs/Champagnegaloppen",
+      "files": [
+        "Champagnegaloppen B1.mp3",
+        "Champagnegaloppen B2.mp3",
+        "Champagnegaloppen T1.mp3",
+        "Champagnegaloppen T2.mp3"
+      ],
+      "pdf": "Champagnegaloppen (Lumbye) - Note.pdf"
+    }
+  ]
+}

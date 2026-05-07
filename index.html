@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>DnS øveapp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Song List Screen -->
+    <div id="song-list-screen" class="screen active">
+      <header class="app-header">
+        <img src="logo.png" alt="DnS" class="header-logo">
+        <div>
+          <h1>DnS øveapp</h1>
+          <p class="app-subtitle">Den norske Studentersangforening</p>
+        </div>
+      </header>
+      <div id="intro-banner" class="intro-banner">
+        <p>Velg en sang, velg stemme, og start øving. Marker seksjoner for å øve vanskelige partier.</p>
+        <button id="dismiss-intro" class="btn-small">OK</button>
+      </div>
+      <ul id="song-list" class="song-list"></ul>
+      <p id="no-songs" class="empty-state" style="display:none">Ingen sanger funnet. Legg til sanger i <code>/songs</code> og oppdater <code>songs.json</code>.</p>
+    </div>
+
+    <!-- Player Screen -->
+    <div id="player-screen" class="screen">
+      <header class="player-header">
+        <button id="back-btn" class="btn-icon" aria-label="Back">&#8592;</button>
+        <h2 id="song-title"></h2>
+        <div class="voice-select-wrapper">
+          <select id="voice-select" class="voice-select"></select>
+        </div>
+      </header>
+
+      <!-- Desktop layout wrapper -->
+      <div id="player-layout" class="player-layout">
+        <!-- PDF Panel (desktop only by default) -->
+        <div id="pdf-panel" class="pdf-panel">
+          <iframe id="pdf-viewer" class="pdf-viewer"></iframe>
+          <div id="divider" class="divider"></div>
+        </div>
+
+        <!-- Audio Panel -->
+        <div id="audio-panel" class="audio-panel">
+          <!-- Timeline / Scrubber -->
+          <div id="timeline-container" class="timeline-container">
+            <canvas id="timeline-canvas"></canvas>
+            <div id="timeline-cursor" class="timeline-cursor"></div>
+          </div>
+          <div class="time-display">
+            <span id="current-time">0:00</span>
+            <span id="total-time">0:00</span>
+          </div>
+
+          <!-- Main Controls -->
+          <div class="main-controls">
+            <button id="play-btn" class="btn-play" aria-label="Play/Pause">
+              <svg id="play-icon" viewBox="0 0 24 24" width="40" height="40"><polygon points="6,3 20,12 6,21" fill="currentColor"/></svg>
+              <svg id="pause-icon" viewBox="0 0 24 24" width="40" height="40" style="display:none"><rect x="5" y="3" width="4" height="18" fill="currentColor"/><rect x="15" y="3" width="4" height="18" fill="currentColor"/></svg>
+            </button>
+            <div class="speed-control">
+              <div class="speed-buttons">
+                <button class="speed-btn" data-speed="0.75">0.75x</button>
+                <button class="speed-btn active" data-speed="1">1x</button>
+                <button class="speed-btn" data-speed="1.25">1.25x</button>
+                <button class="speed-btn" data-speed="1.5">1.5x</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Marking Controls -->
+          <div class="section-controls">
+            <button id="mark-start-btn" class="btn-mark">Mark Start</button>
+            <button id="mark-end-btn" class="btn-mark" disabled>Mark End</button>
+            <span id="mark-status" class="mark-status"></span>
+          </div>
+
+          <!-- Loop Indicator -->
+          <div id="loop-indicator" class="loop-indicator" style="display:none">
+            <span id="loop-info"></span>
+            <button id="stop-loop-btn" class="btn-small btn-danger">Stop</button>
+          </div>
+
+          <!-- Section List -->
+          <div class="section-list-header">
+            <h3>Sections</h3>
+          </div>
+          <ul id="section-list" class="section-list"></ul>
+          <p id="no-sections" class="empty-state-small">No sections yet. Press "Mark Start" while playing to begin.</p>
+
+          <!-- Mobile PDF toggle -->
+          <button id="show-pdf-btn" class="btn-secondary" style="display:none">Show Sheet Music (PDF)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Edit Modal -->
+  <div id="section-modal" class="modal" style="display:none">
+    <div class="modal-content">
+      <h3 id="modal-title">Edit Section</h3>
+      <label>Name
+        <input id="section-name-input" type="text" placeholder="e.g. Bridge, Bar 12-16">
+      </label>
+      <label>Repeat Mode
+        <select id="repeat-mode-select">
+          <option value="none">Play once (no repeat)</option>
+          <option value="infinite">Loop indefinitely</option>
+          <option value="count">Loop N times</option>
+        </select>
+      </label>
+      <label id="repeat-count-label" style="display:none">
+        Repeat Count
+        <input id="repeat-count-input" type="number" min="1" max="100" value="3">
+      </label>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn-secondary">Cancel</button>
+        <button id="modal-save" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audio-el" preload="auto"></audio>
+  <script src="app.js"></script>
+</body>
+</html>
