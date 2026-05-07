@@ -16,6 +16,7 @@
   let markStart = null;
   let playbackSpeed = 1;
   let pendingAddAfterIndex = null;
+  let activeTag = null; // null = show all
 
   // Handle drag state for section edges on the timeline
   let dragState = null; // { sectionIndex, edge: 'start'|'end' }
@@ -111,7 +112,8 @@
   // ---- Voice Part Parsing ----
   function parseVoiceParts(files) {
     const partMap = new Map();
-    const pattern = /[_\-\s.](B1|B2|T1|T2)(?:[_\-](\d+))?/i;
+    // Matches: " B1", " T2.1", " B1.2", "-T1", "_B2", also "T2.1_1.2"
+    const pattern = /[_\-\s](B1|B2|T1|T2)(?:[._](\d+))?(?:[_.][\d.]+)?\.mp3$/i;
     for (const file of files) {
       const match = file.match(pattern);
       if (!match) continue;
@@ -152,15 +154,51 @@
     if (songs.length === 0) {
       noSongsEl.style.display = 'block';
     } else {
+      renderTagFilter();
       renderSongList();
     }
 
     setupEventListeners();
   }
 
+  function renderTagFilter() {
+    const tagFilterEl = document.getElementById('tag-filter');
+    const allTags = new Set();
+    for (const song of songs) {
+      if (song.tags) song.tags.forEach(t => allTags.add(t));
+    }
+    if (allTags.size === 0) { tagFilterEl.innerHTML = ''; return; }
+
+    tagFilterEl.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'tag-btn' + (activeTag === null ? ' active' : '');
+    allBtn.textContent = 'Alle';
+    allBtn.addEventListener('click', () => { activeTag = null; renderTagFilter(); renderSongList(); });
+    tagFilterEl.appendChild(allBtn);
+
+    for (const tag of [...allTags].sort()) {
+      const btn = document.createElement('button');
+      btn.className = 'tag-btn' + (activeTag === tag ? ' active' : '');
+      btn.textContent = tag;
+      btn.addEventListener('click', () => { activeTag = tag; renderTagFilter(); renderSongList(); });
+      tagFilterEl.appendChild(btn);
+    }
+  }
+
   function renderSongList() {
     songListEl.innerHTML = '';
-    for (const song of songs) {
+    const filtered = activeTag
+      ? songs.filter(s => s.tags && s.tags.includes(activeTag))
+      : songs;
+
+    if (filtered.length === 0) {
+      noSongsEl.style.display = 'block';
+    } else {
+      noSongsEl.style.display = 'none';
+    }
+
+    for (const song of filtered) {
       const li = document.createElement('li');
       li.textContent = song.name;
       const arrow = document.createElement('span');

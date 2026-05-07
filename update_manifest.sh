@@ -1,64 +1,57 @@
-#!/bin/bash
-# Scans the /songs folder and generates songs.json manifest
-# Usage: ./update_manifest.sh
+#!/usr/bin/env node
+// Scans /songs and generates songs.json with tags.
+// Usage: node update_manifest.sh   (or ./update_manifest.sh)
 
-SONGS_DIR="songs"
-OUTPUT="songs.json"
+const fs = require('fs');
+const path = require('path');
 
-echo '{' > "$OUTPUT"
-echo '  "songs": [' >> "$OUTPUT"
+const SONGS_DIR = path.join(__dirname, 'songs');
+const OUTPUT = path.join(__dirname, 'songs.json');
 
-first=true
-for dir in "$SONGS_DIR"/*/; do
-  [ -d "$dir" ] || continue
-  folder_name=$(basename "$dir")
+// Tag map: folder name -> tags array
+const TAG_MAP = {};
 
-  mp3_files=()
-  pdf_file=""
-  for f in "$dir"*; do
-    fname=$(basename "$f")
-    case "$fname" in
-      *.mp3|*.MP3) mp3_files+=("$fname") ;;
-      *.pdf|*.PDF) pdf_file="$fname" ;;
-    esac
-  done
+// 17 Mai
+for (const s of [
+  'Brudefærden i hardanger', 'Champagnegaloppen',
+  'Den norske Sjømand (Reissiger)', 'Fædrelandssang (Høiest løfter)',
+  'Gud signe vårt dyre fædraland', 'Ja, vi elsker dette landet',
+  'Jeg vil værge mit land', 'Kongesangen', 'Naar fjordene blaaner',
+  'Norges Fjelde', 'Olaf Trygvason', 'Sangerhilsen', 'Sarpsborgsangen'
+]) TAG_MAP[s] = ['17 Mai'];
 
-  [ ${#mp3_files[@]} -eq 0 ] && continue
+// Konkurranse
+for (const s of [
+  'Backstreet medley', 'Bysjan, bysjan lite bån', 'Du Vilar',
+  'Echo - Foosnæs', 'Folkefrelsar', 'Gryning', 'Kråkevisa',
+  'Londonderry Air', 'På jorden et sted', 'Psaume 121', 'Saltarelle',
+  'Shenandoah', 'Tu es Petrus', 'Verbundenheit', 'Vi er slikt stoff',
+  'Wie Lieblich'
+]) TAG_MAP[s] = ['Konkurranse'];
 
-  if [ "$first" = true ]; then
-    first=false
-  else
-    echo '    ,' >> "$OUTPUT"
-  fi
+const songs = [];
 
-  echo '    {' >> "$OUTPUT"
-  echo "      \"name\": \"$folder_name\"," >> "$OUTPUT"
-  echo "      \"folder\": \"$SONGS_DIR/$folder_name\"," >> "$OUTPUT"
+for (const folder of fs.readdirSync(SONGS_DIR).sort()) {
+  const fullPath = path.join(SONGS_DIR, folder);
+  if (!fs.statSync(fullPath).isDirectory()) continue;
 
-  echo '      "files": [' >> "$OUTPUT"
-  first_file=true
-  for mp3 in "${mp3_files[@]}"; do
-    if [ "$first_file" = true ]; then
-      first_file=false
-    else
-      echo ',' >> "$OUTPUT"
-    fi
-    printf '        "%s"' "$mp3" >> "$OUTPUT"
-  done
-  echo '' >> "$OUTPUT"
+  const files = fs.readdirSync(fullPath);
+  const mp3s = files.filter(f => /\.mp3$/i.test(f));
+  const pdfs = files.filter(f => /\.pdf$/i.test(f));
 
-  if [ -n "$pdf_file" ]; then
-    echo '      ],' >> "$OUTPUT"
-    echo "      \"pdf\": \"$pdf_file\"" >> "$OUTPUT"
-  else
-    echo '      ]' >> "$OUTPUT"
-  fi
+  if (mp3s.length === 0) continue;
 
-  echo -n '    }' >> "$OUTPUT"
-done
+  const entry = {
+    name: folder,
+    folder: 'songs/' + folder,
+    files: mp3s.sort()
+  };
+  if (pdfs.length > 0) entry.pdf = pdfs[0];
+  const normFolder = folder.normalize('NFC');
+  if (TAG_MAP[normFolder]) entry.tags = TAG_MAP[normFolder];
 
-echo '' >> "$OUTPUT"
-echo '  ]' >> "$OUTPUT"
-echo '}' >> "$OUTPUT"
+  songs.push(entry);
+}
 
-echo "Generated $OUTPUT"
+fs.writeFileSync(OUTPUT, JSON.stringify({ songs }, null, 2) + '\n');
+console.log(`Generated ${OUTPUT} with ${songs.length} songs`);
