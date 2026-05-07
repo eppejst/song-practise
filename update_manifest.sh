@@ -38,6 +38,7 @@ for (const folder of fs.readdirSync(SONGS_DIR).sort()) {
   const files = fs.readdirSync(fullPath);
   const mp3s = files.filter(f => /\.mp3$/i.test(f));
   const pdfs = files.filter(f => /\.pdf$/i.test(f));
+  const txts = files.filter(f => /\.txt$/i.test(f));
 
   if (mp3s.length === 0) continue;
 
@@ -47,6 +48,7 @@ for (const folder of fs.readdirSync(SONGS_DIR).sort()) {
     files: mp3s.sort()
   };
   if (pdfs.length > 0) entry.pdf = pdfs[0];
+  if (txts.length > 0) entry.lyrics = txts[0];
   const normFolder = folder.normalize('NFC');
   if (TAG_MAP[normFolder]) entry.tags = TAG_MAP[normFolder];
 

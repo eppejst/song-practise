@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#4a6cf7">
   <title>DnS øveapp</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="logo.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
   <div id="app">
@@ -14,16 +19,22 @@
     <div id="song-list-screen" class="screen active">
       <header class="app-header">
         <img src="logo.png" alt="DnS" class="header-logo">
-        <div>
+        <div class="header-titles">
           <h1>DnS øveapp</h1>
           <p class="app-subtitle">Den norske Studentersangforening</p>
         </div>
+        <a href="https://forms.gle/HFV82ALoTUnqc4d5A" target="_blank" rel="noopener" class="btn-feedback" aria-label="Gi tilbakemelding">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </a>
       </header>
       <div id="intro-banner" class="intro-banner">
         <p>Velg en sang, velg stemme, og start øving. Marker seksjoner for å øve vanskelige partier.</p>
         <button id="dismiss-intro" class="btn-small">OK</button>
       </div>
       <div id="tag-filter" class="tag-filter"></div>
+      <div class="search-bar">
+        <input type="search" id="song-search" placeholder="Søk etter sang…" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
       <ul id="song-list" class="song-list"></ul>
       <p id="no-songs" class="empty-state" style="display:none">Ingen sanger funnet. Legg til sanger i <code>/songs</code> og oppdater <code>songs.json</code>.</p>
     </div>
@@ -36,13 +47,18 @@
         <div class="voice-select-wrapper">
           <select id="voice-select" class="voice-select"></select>
         </div>
+        <a href="https://forms.gle/HFV82ALoTUnqc4d5A" target="_blank" rel="noopener" class="btn-feedback" aria-label="Gi tilbakemelding">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </a>
       </header>
 
       <!-- Desktop layout wrapper -->
       <div id="player-layout" class="player-layout">
-        <!-- PDF Panel (desktop only by default) -->
+        <!-- PDF Panel -->
         <div id="pdf-panel" class="pdf-panel">
           <iframe id="pdf-viewer" class="pdf-viewer"></iframe>
+          <div id="pdf-canvas-container" class="pdf-canvas-container" style="display:none"></div>
+          <div id="pdf-loading" class="pdf-loading" style="display:none">Laster PDF…</div>
           <div id="divider" class="divider"></div>
         </div>
 
@@ -58,19 +74,29 @@
             <span id="total-time">0:00</span>
           </div>
 
-          <!-- Main Controls -->
-          <div class="main-controls">
+          <!-- Navigation Controls -->
+          <div class="nav-controls">
+            <button id="seek-start-btn" class="btn-nav" title="Til start (Home)">⏮</button>
+            <button id="seek-back-btn" class="btn-nav" title="5 sek tilbake (←)">−5s</button>
             <button id="play-btn" class="btn-play" aria-label="Play/Pause">
               <svg id="play-icon" viewBox="0 0 24 24" width="40" height="40"><polygon points="6,3 20,12 6,21" fill="currentColor"/></svg>
               <svg id="pause-icon" viewBox="0 0 24 24" width="40" height="40" style="display:none"><rect x="5" y="3" width="4" height="18" fill="currentColor"/><rect x="15" y="3" width="4" height="18" fill="currentColor"/></svg>
             </button>
-            <div class="speed-control">
-              <div class="speed-buttons">
-                <button class="speed-btn" data-speed="0.75">0.75x</button>
-                <button class="speed-btn active" data-speed="1">1x</button>
-                <button class="speed-btn" data-speed="1.25">1.25x</button>
-                <button class="speed-btn" data-speed="1.5">1.5x</button>
-              </div>
+            <button id="seek-forward-btn" class="btn-nav" title="5 sek frem (→)">+5s</button>
+            <button id="seek-end-btn" class="btn-nav" title="Til slutt">⏭</button>
+          </div>
+
+          <!-- Speed + Stereo row -->
+          <div class="controls-row">
+            <div class="speed-buttons">
+              <button class="speed-btn" data-speed="0.75">0.75x</button>
+              <button class="speed-btn active" data-speed="1">1x</button>
+              <button class="speed-btn" data-speed="1.25">1.25x</button>
+              <button class="speed-btn" data-speed="1.5">1.5x</button>
+            </div>
+            <div class="stereo-controls">
+              <button id="mute-left" class="btn-channel active" aria-label="Venstre kanal">L</button>
+              <button id="mute-right" class="btn-channel active" aria-label="Høyre kanal">R</button>
             </div>
           </div>
 
@@ -93,6 +119,12 @@
           </div>
           <ul id="section-list" class="section-list"></ul>
           <p id="no-sections" class="empty-state-small">No sections yet. Press "Mark Start" while playing to begin.</p>
+
+          <!-- Lyrics Panel -->
+          <div id="lyrics-panel" class="lyrics-panel" style="display:none">
+            <h3>Tekst</h3>
+            <pre id="lyrics-content" class="lyrics-content"></pre>
+          </div>
 
           <!-- Mobile PDF toggle -->
           <button id="show-pdf-btn" class="btn-secondary" style="display:none">Show Sheet Music (PDF)</button>
@@ -124,6 +156,13 @@
         <button id="modal-save" class="btn-primary">Save</button>
       </div>
     </div>
+  </div>
+
+  <!-- Repeat Quick-Toggle Popover -->
+  <div id="repeat-popover" class="repeat-popover" style="display:none">
+    <button class="repeat-pop-btn" data-mode="none">1×</button>
+    <button class="repeat-pop-btn" data-mode="infinite">∞</button>
+    <button class="repeat-pop-btn" data-mode="count">N×</button>
   </div>
 
   <audio id="audio-el" preload="auto"></audio>

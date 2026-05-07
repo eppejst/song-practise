@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  // ---- App Version ----
+  // Bump this string to wipe all users' non-section localStorage on next visit.
+  const APP_VERSION = '1';
+
+  // Set up PDF.js worker
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
   const SECTION_COLORS = [
     '#4a6cf7', '#16a34a', '#ea580c', '#e11d48', '#7c3aed',
     '#0284c7', '#dc2626', '#ca8a04', '#059669', '#ea580c'
@@ -16,10 +26,17 @@
   let markStart = null;
   let playbackSpeed = 1;
   let pendingAddAfterIndex = null;
-  let activeTag = null; // null = show all
+  let activeTag = null;
+  let searchQuery = '';
 
   // Handle drag state for section edges on the timeline
   let dragState = null; // { sectionIndex, edge: 'start'|'end' }
+
+  // ---- Web Audio (Stereo L/R) ----
+  let audioCtx = null;
+  let gainL = null;
+  let gainR = null;
+  let audioGraphReady = false;
 
   // ---- DOM refs ----
   const $ = (s) => document.querySelector(s);
@@ -52,6 +69,8 @@
   const showPdfBtn = $('#show-pdf-btn');
   const pdfPanel = $('#pdf-panel');
   const pdfViewer = $('#pdf-viewer');
+  const pdfCanvasContainer = $('#pdf-canvas-container');
+  const pdfLoading = $('#pdf-loading');
   const divider = $('#divider');
   const sectionModal = $('#section-modal');
   const modalTitle = $('#modal-title');
@@ -61,8 +80,19 @@
   const repeatCountInput = $('#repeat-count-input');
   const modalCancel = $('#modal-cancel');
   const modalSave = $('#modal-save');
+  const songSearchInput = $('#song-search');
+  const muteLeftBtn = $('#mute-left');
+  const muteRightBtn = $('#mute-right');
+  const seekStartBtn = $('#seek-start-btn');
+  const seekBackBtn = $('#seek-back-btn');
+  const seekForwardBtn = $('#seek-forward-btn');
+  const seekEndBtn = $('#seek-end-btn');
+  const lyricsPanel = $('#lyrics-panel');
+  const lyricsContent = $('#lyrics-content');
+  const repeatPopover = $('#repeat-popover');
 
   let editingSectionIndex = null;
+  let repeatPopoverIndex = null;
 
   // ---- Helpers ----
   function formatTime(sec) {
@@ -96,7 +126,12 @@
 
   function savePrefs() {
     if (!currentSong) return;
-    const prefs = { voicePart: currentVoicePart?.label, speed: playbackSpeed };
+    const prefs = {
+      voicePart: currentVoicePart?.label,
+      speed: playbackSpeed,
+      channelL: gainL ? gainL.gain.value > 0 : true,
+      channelR: gainR ? gainR.gain.value > 0 : true,
+    };
     localStorage.setItem('choir_app_' + currentSong.name.replace(/\s+/g, '_') + '_prefs', JSON.stringify(prefs));
   }
 
@@ -135,6 +170,20 @@
 
   // ---- Init ----
   async function init() {
+    // Version-based localStorage wipe (preserves all section data)
+    const storedVersion = localStorage.getItem('appVersion');
+    if (storedVersion !== APP_VERSION) {
+      const saved = {};
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('choir_app_') && key.endsWith('_sections')) {
+          saved[key] = localStorage.getItem(key);
+        }
+      }
+      localStorage.clear();
+      for (const [k, v] of Object.entries(saved)) localStorage.setItem(k, v);
+      localStorage.setItem('appVersion', APP_VERSION);
+    }
+
     if (localStorage.getItem('choir_app_intro_dismissed')) {
       introBanner.style.display = 'none';
     }
@@ -159,6 +208,11 @@
     }
 
     setupEventListeners();
+
+    // Register service worker for PWA / offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
   }
 
   function renderTagFilter() {
@@ -188,9 +242,11 @@
 
   function renderSongList() {
     songListEl.innerHTML = '';
-    const filtered = activeTag
-      ? songs.filter(s => s.tags && s.tags.includes(activeTag))
-      : songs;
+    const q = searchQuery.toLowerCase();
+    const filtered = songs.filter(s =>
+      (!activeTag || (s.tags && s.tags.includes(activeTag))) &&
+      (!q || s.name.toLowerCase().includes(q))
+    );
 
     if (filtered.length === 0) {
       noSongsEl.style.display = 'block';
@@ -227,29 +283,68 @@
       voiceSelect.appendChild(opt);
     }
 
+    // Voice preference: per-song prefs first, then global voice, then first part
     const prefs = loadPrefs();
-    const prefPart = prefs && currentParts.find(p => p.label === prefs.voicePart);
-    if (prefs?.speed) {
-      setSpeed(prefs.speed);
-    }
+    const globalVoice = localStorage.getItem('choir_app_global_voice');
+    const prefPart =
+      (prefs && currentParts.find(p => p.label === prefs.voicePart)) ||
+      (globalVoice && currentParts.find(p => p.label === globalVoice)) ||
+      null;
+
+    if (prefs?.speed) setSpeed(prefs.speed);
 
     const initialPart = prefPart || currentParts[0];
     voiceSelect.value = initialPart.label;
     selectVoicePart(initialPart);
 
-    // PDF
+    // Restore L/R channel state from prefs
+    if (prefs && gainL && gainR) {
+      gainL.gain.value = prefs.channelL !== false ? 1 : 0;
+      gainR.gain.value = prefs.channelR !== false ? 1 : 0;
+      updateChannelButtons();
+    }
+
+    // PDF setup
     if (song.pdf) {
       const pdfUrl = song.folder + '/' + song.pdf;
-      pdfViewer.src = pdfUrl;
-      showPdfBtn.style.display = '';
       if (window.innerWidth >= 768) {
+        // Desktop: use iframe
+        pdfViewer.src = pdfUrl;
+        pdfViewer.style.display = '';
+        pdfCanvasContainer.style.display = 'none';
         pdfPanel.style.display = '';
+      } else {
+        // Mobile: use PDF.js canvas rendering
+        pdfViewer.src = '';
+        pdfViewer.style.display = 'none';
+        pdfCanvasContainer.style.display = '';
+        renderPdfMobile(pdfUrl);
+        // Panel stays hidden until user taps "Show"
       }
+      showPdfBtn.style.display = '';
+      showPdfBtn.textContent = 'Show Sheet Music (PDF)';
     } else {
       pdfViewer.src = '';
+      pdfViewer.style.display = '';
+      pdfCanvasContainer.style.display = 'none';
       showPdfBtn.style.display = 'none';
       pdfPanel.style.display = 'none';
       pdfPanel.classList.remove('mobile-show');
+    }
+
+    // Lyrics: fetch the .txt file if listed in songs.json
+    if (song.lyrics) {
+      fetch(song.folder + '/' + song.lyrics)
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(text => {
+          lyricsContent.textContent = text;
+          lyricsPanel.style.display = '';
+        })
+        .catch(() => {
+          lyricsPanel.style.display = 'none';
+        });
+    } else {
+      lyricsPanel.style.display = 'none';
     }
 
     songListScreen.classList.remove('active');
@@ -277,12 +372,44 @@
     renderHandles();
     savePrefs();
     setupMediaSession();
+
+    // Persist global voice preference
+    localStorage.setItem('choir_app_global_voice', part.label);
+  }
+
+  // ---- Web Audio Graph (Stereo L/R) ----
+  function ensureAudioGraph() {
+    if (audioGraphReady) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaElementSource(audio);
+      const splitter = audioCtx.createChannelSplitter(2);
+      const merger = audioCtx.createChannelMerger(2);
+      gainL = audioCtx.createGain();
+      gainR = audioCtx.createGain();
+      source.connect(splitter);
+      splitter.connect(gainL, 0);
+      gainL.connect(merger, 0, 0);
+      splitter.connect(gainR, 1);
+      gainR.connect(merger, 0, 1);
+      merger.connect(audioCtx.destination);
+      audioGraphReady = true;
+    } catch (e) {
+      console.warn('Web Audio API unavailable:', e);
+    }
+  }
+
+  function updateChannelButtons() {
+    if (muteLeftBtn) muteLeftBtn.classList.toggle('active', !gainL || gainL.gain.value > 0);
+    if (muteRightBtn) muteRightBtn.classList.toggle('active', !gainR || gainR.gain.value > 0);
   }
 
   // ---- Audio Controls ----
   function togglePlay() {
     if (!audio.src) return;
+    ensureAudioGraph();
     if (audio.paused) {
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       audio.play().catch(() => {});
     } else {
       audio.pause();
@@ -311,6 +438,42 @@
   function seekTo(fraction) {
     if (!isFinite(audio.duration)) return;
     audio.currentTime = fraction * audio.duration;
+  }
+
+  // ---- PDF.js Mobile Rendering ----
+  async function renderPdfMobile(url) {
+    if (!window.pdfjsLib) return;
+    pdfLoading.style.display = '';
+    pdfCanvasContainer.innerHTML = '';
+
+    try {
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      // Wait for layout to settle so we get correct width
+      const containerWidth = pdfCanvasContainer.clientWidth || window.innerWidth;
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const unscaled = page.getViewport({ scale: 1 });
+        const dpr = window.devicePixelRatio || 1;
+        const scale = (containerWidth / unscaled.width) * dpr;
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width = '100%';
+        canvas.style.display = 'block';
+        canvas.style.borderBottom = '1px solid var(--border)';
+
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        pdfCanvasContainer.appendChild(canvas);
+      }
+    } catch (e) {
+      pdfCanvasContainer.innerHTML =
+        '<p style="padding:20px;color:var(--text-dim)">Kunne ikke laste PDF.</p>';
+    } finally {
+      pdfLoading.style.display = 'none';
+    }
   }
 
   // ---- Timeline Drawing ----
@@ -519,15 +682,25 @@
       info.appendChild(name);
       info.appendChild(times);
 
-      const badge = document.createElement('span');
+      // Repeat badge — clickable for quick toggle
+      const badge = document.createElement('button');
       badge.className = 'section-repeat-badge';
+      badge.setAttribute('aria-label', 'Endre repetisjonstype');
       if (sec.repeatMode === 'none') {
-        badge.textContent = '1x';
+        badge.textContent = '1×';
       } else if (sec.repeatMode === 'infinite') {
         badge.textContent = '∞';
       } else {
-        badge.textContent = sec.repeatCount + 'x';
+        badge.textContent = sec.repeatCount + '×';
       }
+      badge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (repeatPopoverIndex === i && repeatPopover.style.display !== 'none') {
+          closeRepeatPopover();
+        } else {
+          openRepeatPopover(i, badge);
+        }
+      });
 
       const actions = document.createElement('div');
       actions.className = 'section-actions';
@@ -535,13 +708,18 @@
       const editBtn = document.createElement('button');
       editBtn.innerHTML = '&#9998;';
       editBtn.setAttribute('aria-label', 'Edit');
-      editBtn.addEventListener('click', (e) => { e.stopPropagation(); openSectionModal(i); });
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeRepeatPopover();
+        openSectionModal(i);
+      });
 
       const delBtn = document.createElement('button');
       delBtn.innerHTML = '&#10005;';
       delBtn.setAttribute('aria-label', 'Delete');
       delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        closeRepeatPopover();
         if (activeLoop && activeLoop.sectionIndex === i) stopLoop();
         sections.splice(i, 1);
         saveSections();
@@ -558,7 +736,10 @@
       li.appendChild(badge);
       li.appendChild(actions);
 
-      li.addEventListener('click', () => playSectionOrLoop(i));
+      li.addEventListener('click', () => {
+        closeRepeatPopover();
+        playSectionOrLoop(i);
+      });
       sectionListEl.appendChild(li);
 
       // "Add next" button after each section
@@ -571,6 +752,41 @@
       });
       sectionListEl.appendChild(addBtn);
     }
+  }
+
+  // ---- Repeat Quick-Toggle Popover ----
+  function openRepeatPopover(index, anchorEl) {
+    repeatPopoverIndex = index;
+    const sec = sections[index];
+
+    // Highlight current mode
+    repeatPopover.querySelectorAll('.repeat-pop-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === sec.repeatMode);
+    });
+
+    repeatPopover.style.display = 'flex';
+
+    // Position near badge
+    const rect = anchorEl.getBoundingClientRect();
+    const popW = repeatPopover.offsetWidth || 120;
+    const popH = repeatPopover.offsetHeight || 40;
+    let top = rect.bottom + 6;
+    let left = rect.left;
+
+    // Flip up if too close to bottom
+    if (top + popH > window.innerHeight - 12) {
+      top = rect.top - popH - 6;
+    }
+    // Clamp horizontally
+    left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
+
+    repeatPopover.style.top = top + 'px';
+    repeatPopover.style.left = left + 'px';
+  }
+
+  function closeRepeatPopover() {
+    repeatPopover.style.display = 'none';
+    repeatPopoverIndex = null;
   }
 
   // ---- Section Modal ----
@@ -607,7 +823,6 @@
   function playSectionOrLoop(index) {
     const sec = sections[index];
     if (sec.repeatMode === 'none') {
-      // Play once: just seek to start and play, set a one-shot "loop"
       activeLoop = { sectionIndex: index, remaining: 1, total: 1 };
     } else if (sec.repeatMode === 'infinite') {
       activeLoop = { sectionIndex: index, remaining: Infinity, total: Infinity };
@@ -615,6 +830,8 @@
       activeLoop = { sectionIndex: index, remaining: sec.repeatCount, total: sec.repeatCount };
     }
     audio.currentTime = sec.start;
+    ensureAudioGraph();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     audio.play().catch(() => {});
     updateLoopIndicator();
     renderSections();
@@ -745,7 +962,6 @@
   // ---- Keyboard Shortcuts ----
   function setupKeyboard() {
     document.addEventListener('keydown', (e) => {
-      // Don't handle keys when modal is open or typing in an input
       if (sectionModal.style.display !== 'none') return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
       if (!playerScreen.classList.contains('active')) return;
@@ -767,6 +983,12 @@
           updateCursor();
           drawTimeline();
           break;
+        case 'Home':
+          e.preventDefault();
+          audio.currentTime = 0;
+          updateCursor();
+          drawTimeline();
+          break;
       }
     });
   }
@@ -777,6 +999,7 @@
       audio.pause();
       audio.src = '';
       stopLoop();
+      closeRepeatPopover();
       playerScreen.classList.remove('active');
       songListScreen.classList.add('active');
     });
@@ -787,6 +1010,52 @@
     });
 
     playBtn.addEventListener('click', togglePlay);
+
+    // Navigation buttons
+    seekStartBtn.addEventListener('click', () => {
+      audio.currentTime = 0;
+      updateCursor();
+      drawTimeline();
+    });
+    seekBackBtn.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 5);
+      updateCursor();
+      drawTimeline();
+    });
+    seekForwardBtn.addEventListener('click', () => {
+      audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
+      updateCursor();
+      drawTimeline();
+    });
+    seekEndBtn.addEventListener('click', () => {
+      if (isFinite(audio.duration)) audio.currentTime = audio.duration;
+      updateCursor();
+      drawTimeline();
+    });
+
+    // Stereo L/R
+    muteLeftBtn.addEventListener('click', () => {
+      ensureAudioGraph();
+      if (!gainL) return;
+      gainL.gain.value = gainL.gain.value > 0 ? 0 : 1;
+      updateChannelButtons();
+      savePrefs();
+    });
+    muteRightBtn.addEventListener('click', () => {
+      ensureAudioGraph();
+      if (!gainR) return;
+      gainR.gain.value = gainR.gain.value > 0 ? 0 : 1;
+      updateChannelButtons();
+      savePrefs();
+    });
+
+    // Search
+    if (songSearchInput) {
+      songSearchInput.addEventListener('input', () => {
+        searchQuery = songSearchInput.value;
+        renderSongList();
+      });
+    }
 
     audio.addEventListener('play', updatePlayButton);
     audio.addEventListener('pause', updatePlayButton);
@@ -814,7 +1083,7 @@
     markEndBtn.addEventListener('click', onMarkEnd);
     stopLoopBtn.addEventListener('click', stopLoop);
 
-    // Modal
+    // Section modal
     repeatModeSelect.addEventListener('change', () => {
       repeatCountLabel.style.display = repeatModeSelect.value === 'count' ? '' : 'none';
     });
@@ -825,6 +1094,39 @@
     });
     sectionModal.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); saveSectionModal(); }
+    });
+
+    // Repeat popover buttons
+    repeatPopover.querySelectorAll('.repeat-pop-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = btn.dataset.mode;
+        if (repeatPopoverIndex === null) return;
+
+        if (mode === 'count') {
+          // Open full modal for count input
+          const idx = repeatPopoverIndex;
+          closeRepeatPopover();
+          sections[idx].repeatMode = 'count';
+          openSectionModal(idx);
+          repeatModeSelect.value = 'count';
+          repeatCountLabel.style.display = '';
+        } else {
+          sections[repeatPopoverIndex].repeatMode = mode;
+          saveSections();
+          renderSections();
+          closeRepeatPopover();
+        }
+      });
+    });
+
+    // Close popover on outside click
+    document.addEventListener('click', (e) => {
+      if (repeatPopover.style.display !== 'none' &&
+          !repeatPopover.contains(e.target) &&
+          !e.target.closest('.section-repeat-badge')) {
+        closeRepeatPopover();
+      }
     });
 
     // Mobile PDF toggle
