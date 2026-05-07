@@ -110,6 +110,38 @@ html, body {
   padding-right: 30px;
 }
 
+/* ---- Tag Filter ---- */
+.tag-filter {
+  display: flex;
+  gap: 6px;
+  padding: 10px 20px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+.tag-filter:empty {
+  display: none;
+}
+.tag-btn {
+  padding: 7px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 34px;
+  transition: all 0.15s;
+}
+.tag-btn.active {
+  background: var(--text);
+  color: var(--surface);
+  border-color: var(--text);
+}
+
 /* ---- Intro Banner ---- */
 .intro-banner {
   background: var(--surface2);
