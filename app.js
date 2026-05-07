@@ -81,8 +81,8 @@
   const modalCancel = $('#modal-cancel');
   const modalSave = $('#modal-save');
   const songSearchInput = $('#song-search');
-  const muteLeftBtn = $('#mute-left');
-  const muteRightBtn = $('#mute-right');
+  const volLeftSlider = $('#vol-left');
+  const volRightSlider = $('#vol-right');
   const seekStartBtn = $('#seek-start-btn');
   const seekBackBtn = $('#seek-back-btn');
   const seekForwardBtn = $('#seek-forward-btn');
@@ -298,11 +298,12 @@
     selectVoicePart(initialPart);
 
     // Restore L/R channel state from prefs
-    if (prefs && gainL && gainR) {
-      gainL.gain.value = prefs.channelL !== false ? 1 : 0;
-      gainR.gain.value = prefs.channelR !== false ? 1 : 0;
-      updateChannelButtons();
-    }
+    const lVal = prefs?.channelL != null ? prefs.channelL : 1;
+    const rVal = prefs?.channelR != null ? prefs.channelR : 1;
+    if (volLeftSlider) volLeftSlider.value = lVal;
+    if (volRightSlider) volRightSlider.value = rVal;
+    if (gainL) gainL.gain.value = lVal;
+    if (gainR) gainR.gain.value = rVal;
 
     // PDF setup
     if (song.pdf) {
@@ -399,9 +400,9 @@
     }
   }
 
-  function updateChannelButtons() {
-    if (muteLeftBtn) muteLeftBtn.classList.toggle('active', !gainL || gainL.gain.value > 0);
-    if (muteRightBtn) muteRightBtn.classList.toggle('active', !gainR || gainR.gain.value > 0);
+  function updateChannelSliders() {
+    if (volLeftSlider && gainL) volLeftSlider.value = gainL.gain.value;
+    if (volRightSlider && gainR) volRightSlider.value = gainR.gain.value;
   }
 
   // ---- Audio Controls ----
@@ -1033,19 +1034,15 @@
       drawTimeline();
     });
 
-    // Stereo L/R
-    muteLeftBtn.addEventListener('click', () => {
+    // Stereo L/R volume sliders
+    volLeftSlider.addEventListener('input', () => {
       ensureAudioGraph();
-      if (!gainL) return;
-      gainL.gain.value = gainL.gain.value > 0 ? 0 : 1;
-      updateChannelButtons();
+      if (gainL) gainL.gain.value = parseFloat(volLeftSlider.value);
       savePrefs();
     });
-    muteRightBtn.addEventListener('click', () => {
+    volRightSlider.addEventListener('input', () => {
       ensureAudioGraph();
-      if (!gainR) return;
-      gainR.gain.value = gainR.gain.value > 0 ? 0 : 1;
-      updateChannelButtons();
+      if (gainR) gainR.gain.value = parseFloat(volRightSlider.value);
       savePrefs();
     });
 
