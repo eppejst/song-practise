@@ -1,0 +1,224 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 env(safe-area-inset-bottom, 0);
+  background: var(--color-surface);
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ---- Timeline ---- */
+.timelineContainer {
+  position: relative;
+  height: 56px;
+  background: var(--color-surface-2);
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timelineCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-primary);
+  pointer-events: none;
+  transform: translateX(-1px);
+}
+
+.timeDisplay {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* ---- Nav Controls ---- */
+.navControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+
+.navBtn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 40px;
+  transition: background 0.1s;
+}
+
+.navBtn:active {
+  background: var(--color-border);
+}
+
+.playBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.playBtn:active {
+  background: var(--color-primary-dark);
+  transform: scale(0.95);
+}
+
+/* ---- Speed + Stereo ---- */
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.speedButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.speedBtn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.speedBtnActive {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.stereoControls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.channelCtrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.channelSlider {
+  flex: 1;
+  height: 4px;
+  accent-color: var(--color-primary);
+}
+
+/* ---- Section Controls ---- */
+.sectionControls {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.markBtn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 42px;
+  transition: all 0.15s;
+}
+
+.markBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.marking {
+  background: #fef9c3;
+  border-color: #ca8a04;
+  color: #92400e;
+}
+
+/* ---- Loop Indicator ---- */
+.loopIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #eff6ff;
+  border-top: 1px solid #bfdbfe;
+  font-size: 13px;
+  color: #1e40af;
+  flex-shrink: 0;
+}
+
+.stopLoopBtn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: var(--color-danger);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.1s;
+}
+
+.stopLoopBtn:active {
+  background: #fecaca;
+}
+
+/* ---- Lyrics ---- */
+.lyricsPanel {
+  padding: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.lyricsPanel h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-text-muted);
+}
+
+.lyricsContent {
+  font-size: 14px;
+  font-family: inherit;
+  white-space: pre-wrap;
+  color: var(--color-text);
+  line-height: 1.6;
+}

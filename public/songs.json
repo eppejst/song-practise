@@ -1,0 +1,416 @@
+{
+  "songs": [
+    {
+      "name": "Backstreet medley",
+      "folder": "songs/Backstreet medley",
+      "files": [
+        "Backstreet medley B1.mp3",
+        "Backstreet medley B2.mp3",
+        "Backstreet medley T1.mp3",
+        "Backstreet medley T2.1_1.2.mp3",
+        "Backstreet medley T2.2.mp3"
+      ],
+      "pdf": "Backstreet Boys Medley - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Brudefærden i hardanger",
+      "folder": "songs/Brudefærden i hardanger",
+      "files": [
+        "Brudefærden i Hardanger B1.mp3",
+        "Brudefærden i Hardanger B2.mp3",
+        "Brudefærden i Hardanger T1.mp3",
+        "Brudefærden i Hardanger T2.mp3"
+      ],
+      "pdf": "Brudefærden i Hardanger (Kjerulf) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Bysjan, bysjan lite bån",
+      "folder": "songs/Bysjan, bysjan lite bån",
+      "files": [
+        "14 Bysjan, bysjan lite bån - Vårkonsert DnS & KSS - Svermerier (opptak - Rolf Valle).mp3",
+        "17 Bysjan, bysjan lite bån - Jorden rundt på 80 minutter 2016 10 08 (opptak - Rolf Valle).mp3",
+        "Bysjan, bysjan lite bån B1.mp3",
+        "Bysjan, bysjan lite bån B2 (vokal).mp3",
+        "Bysjan, bysjan lite bån B2.mp3",
+        "Bysjan, bysjan lite bån T1.mp3",
+        "Bysjan, bysjan lite bån T2.mp3"
+      ],
+      "pdf": "Bysjan, bysjan lite bån (Havrøy) - Note (TTBB).pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Champagnegaloppen",
+      "folder": "songs/Champagnegaloppen",
+      "files": [
+        "Champagnegaloppen B1.mp3",
+        "Champagnegaloppen B2.mp3",
+        "Champagnegaloppen T1.mp3",
+        "Champagnegaloppen T2.mp3"
+      ],
+      "pdf": "Champagnegaloppen (Lumbye) - Note.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Den norske Sjømand (Reissiger)",
+      "folder": "songs/Den norske Sjømand (Reissiger)",
+      "files": [
+        "Den norske Sjømand (Reissiger) B1.mp3",
+        "Den norske Sjømand (Reissiger) B2.mp3",
+        "Den norske Sjømand (Reissiger) T1.mp3",
+        "Den norske Sjømand (Reissiger) T2.mp3"
+      ],
+      "pdf": "Den norske Sjømand (Reissiger) - Note.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Du Vilar",
+      "folder": "songs/Du Vilar",
+      "files": [
+        "Du vilar B1.1.mp3",
+        "Du vilar B1.2.mp3",
+        "Du vilar B2.1.mp3",
+        "Du vilar B2.2.mp3",
+        "Du vilar T1.1.mp3",
+        "Du vilar T1.2.mp3",
+        "Du vilar T2.1.mp3",
+        "Du vilar T2.2.mp3"
+      ],
+      "pdf": "Du vilar (Sandström) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Echo - Foosnæs",
+      "folder": "songs/Echo - Foosnæs",
+      "files": [
+        "Echo-Foosnæs-B1.mp3",
+        "Echo-Foosnæs-B2.mp3",
+        "Echo-Foosnæs-T1.mp3",
+        "Echo-Foosnæs-T2.mp3"
+      ],
+      "pdf": "Echo.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Folkefrelsar",
+      "folder": "songs/Folkefrelsar",
+      "files": [
+        "Folkefrelsar B1.mp3",
+        "Folkefrelsar B2.mp3",
+        "Folkefrelsar T1.mp3",
+        "Folkefrelsar T2.mp3"
+      ],
+      "pdf": "Folkefrelsar (arr. Arnesen) - note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Fædrelandssang (Høiest løfter)",
+      "folder": "songs/Fædrelandssang (Høiest løfter)",
+      "files": [
+        "Fædrelandssang Reissiger B1.mp3",
+        "Fædrelandssang Reissiger B2.mp3",
+        "Fædrelandssang Reissiger T1.mp3",
+        "Fædrelandssang Reissiger T2.mp3"
+      ],
+      "pdf": "Fædrelandssang - Højest løfter (Reissiger) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Gryning",
+      "folder": "songs/Gryning",
+      "files": [
+        "Gryning vid havet B1.1.mp3",
+        "Gryning vid havet B1.2.mp3",
+        "Gryning vid havet B2.1.mp3",
+        "Gryning vid havet B2.2.mp3",
+        "Gryning vid havet T1.mp3",
+        "Gryning vid havet T2.1.mp3",
+        "Gryning vid havet T2.2.mp3"
+      ],
+      "pdf": "Gryning vid havet (Alfvén) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Gud signe vårt dyre fædraland",
+      "folder": "songs/Gud signe vårt dyre fædraland",
+      "files": [
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) B1.1.mp3",
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) B1.2.mp3",
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) B2.mp3",
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) T1.mp3",
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) T2.1.mp3",
+        "Gud signe vaart dyre Fedraland (arr. Bodsberg) T2.2.mp3"
+      ],
+      "pdf": "Gud signe vaart dyre Fedraland (Arr. Bodsberg) - Note.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Ja, vi elsker dette landet",
+      "folder": "songs/Ja, vi elsker dette landet",
+      "files": [
+        "Ja vi elsker dette landet B1.mp3",
+        "Ja vi elsker dette landet B2.mp3",
+        "Ja vi elsker dette landet T1.mp3",
+        "Ja vi elsker dette landet T2.mp3"
+      ],
+      "pdf": "Ja, vi elsker dette landet (Nordraak) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Jeg vil værge mit land",
+      "folder": "songs/Jeg vil værge mit land",
+      "files": [
+        "Fædrelandssang (Tischendorf) Jeg vil værge mit Land B1.mp3",
+        "Fædrelandssang (Tischendorf) Jeg vil værge mit Land B2.mp3",
+        "Fædrelandssang (Tischendorf) Jeg vil værge mit Land T1.mp3",
+        "Fædrelandssang (Tischendorf) Jeg vil værge mit Land T2.mp3"
+      ],
+      "pdf": "Jeg vil værge mit land (Tischendorf) note.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Kongesangen",
+      "folder": "songs/Kongesangen",
+      "files": [
+        "Kongesangen - Tormod B1.mp3",
+        "Kongesangen - Tormod B2.mp3",
+        "Kongesangen - Tormod T1.mp3",
+        "Kongesangen - Tormod T2.mp3"
+      ],
+      "pdf": "KongesangenTTBB - Full Score.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Kråkevisa",
+      "folder": "songs/Kråkevisa",
+      "files": [
+        "Kråkevisa (Ødegaard) B1.mp3",
+        "Kråkevisa (Ødegaard) B2.mp3",
+        "Kråkevisa (Ødegaard) T1.mp3",
+        "Kråkevisa (Ødegaard) T2.mp3"
+      ],
+      "pdf": "Kråkevisa (arr. Ødegaard) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Londonderry Air",
+      "folder": "songs/Londonderry Air",
+      "files": [
+        "Londonderry_Air_B1.mp3",
+        "Londonderry_Air_B2.mp3",
+        "Londonderry_Air_T2.mp3"
+      ],
+      "pdf": "Londonderry Air (arr. Sund) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Naar fjordene blaaner",
+      "folder": "songs/Naar fjordene blaaner",
+      "files": [
+        "Naar Fjordene blaaner B1.mp3",
+        "Naar Fjordene blaaner B2.1.mp3",
+        "Naar Fjordene blaaner B2.2.mp3",
+        "Naar Fjordene blaaner T1.mp3",
+        "Naar Fjordene blaaner T2.mp3"
+      ],
+      "pdf": "Naar Fjordene blaaner (Paulsen) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Norges Fjelde",
+      "folder": "songs/Norges Fjelde",
+      "files": [
+        "Norges Fjelde B1.mp3",
+        "Norges Fjelde B2.mp3",
+        "Norges Fjelde T1.mp3",
+        "Norges Fjelde T2.mp3"
+      ],
+      "pdf": "Norges Fjelde (Kjerulf) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Olaf Trygvason",
+      "folder": "songs/Olaf Trygvason",
+      "files": [
+        "Olaf Trygvason (Reissiger) B1.mp3",
+        "Olaf Trygvason (Reissiger) B2.mp3",
+        "Olaf Trygvason (Reissiger) T1.mp3",
+        "Olaf Trygvason (Reissiger) T2.mp3"
+      ],
+      "pdf": "Olaf Trygvason (Reissiger) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "På jorden et sted",
+      "folder": "songs/På jorden et sted",
+      "files": [
+        "På jorden et sted B1.mp3",
+        "På jorden et sted B2.mp3",
+        "På jorden et sted T1.mp3",
+        "På jorden et sted T2.mp3"
+      ],
+      "pdf": "På jorden et sted.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Psaume 121",
+      "folder": "songs/Psaume 121",
+      "files": [
+        "Psaume 121 B2.mp3",
+        "Psaume_121 (Milhaud) B1.mp3",
+        "Psaume_121 (Milhaud) B2.mp3",
+        "Psaume_121 (Milhaud) T1.mp3",
+        "Psaume_121 (Milhaud) T2.mp3"
+      ],
+      "pdf": "Psaume 121 (Milhaud) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Sangerhilsen",
+      "folder": "songs/Sangerhilsen",
+      "files": [
+        "Sangerhilsen B1.mp3",
+        "Sangerhilsen B2.mp3",
+        "Sangerhilsen T1.mp3",
+        "Sangerhilsen T2.mp3"
+      ],
+      "pdf": "Sangerhilsen (Grieg) - Note og tekst.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Sarpsborgsangen",
+      "folder": "songs/Sarpsborgsangen",
+      "files": [
+        "Sarpsborgsangen B1.mp3",
+        "Sarpsborgsangen B2.mp3",
+        "Sarpsborgsangen T1.mp3",
+        "Sarpsborgsangen T2.mp3"
+      ],
+      "pdf": "Sarpsborgsangen 126.pdf",
+      "tags": [
+        "17 Mai"
+      ]
+    },
+    {
+      "name": "Shenandoah",
+      "folder": "songs/Shenandoah",
+      "files": [
+        "Shenandoah (Jones-Kamperhaug) B1.1.mp3",
+        "Shenandoah (Jones-Kamperhaug) B1.2.mp3",
+        "Shenandoah (Jones-Kamperhaug) B2.1.mp3",
+        "Shenandoah (Jones-Kamperhaug) B2.2.mp3",
+        "Shenandoah (Jones-Kamperhaug) T1.1.mp3",
+        "Shenandoah (Jones-Kamperhaug) T1.2.mp3",
+        "Shenandoah (Jones-Kamperhaug) T2.1.mp3",
+        "Shenandoah (Jones-Kamperhaug) T2.2.mp3"
+      ],
+      "pdf": "Shenandoah (arr. Jones-Kamperhaug) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Tu es Petrus",
+      "folder": "songs/Tu es Petrus",
+      "files": [
+        "DnS - Tu Es Petrus.mp3",
+        "Tu es Petrus B1.1.mp3",
+        "Tu es Petrus B1.2.mp3",
+        "Tu es Petrus B2.mp3",
+        "Tu es Petrus T1.mp3",
+        "Tu es Petrus T2.mp3"
+      ],
+      "pdf": "Tu es Petrus (Petersson) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Verbundenheit",
+      "folder": "songs/Verbundenheit",
+      "files": [
+        "Verbundenheit B1.mp3",
+        "Verbundenheit B2.mp3",
+        "Verbundenheit T1.mp3",
+        "Verbundenheit T2.mp3"
+      ],
+      "pdf": "Verbundenheit (Schönberg) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Vi er slikt stoff",
+      "folder": "songs/Vi er slikt stoff",
+      "files": [
+        "Vi er slikt stoff som draum er laga av B1.mp3",
+        "Vi er slikt stoff som draum er laga av B2.mp3",
+        "Vi er slikt stoff som draum er laga av T1.mp3",
+        "Vi er slikt stoff som draum er laga av T2.mp3"
+      ],
+      "pdf": "Vi er slikt stoff som draum er laga av (Dyrud) - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    },
+    {
+      "name": "Wie Lieblich",
+      "folder": "songs/Wie Lieblich",
+      "files": [
+        "Ein deutsches Requiem (Brahms, arr Unander) 4 - Wie lieblich sind deine Wohnungen mannskor B1.mp3",
+        "Ein deutsches Requiem (Brahms, arr Unander) 4 - Wie lieblich sind deine Wohnungen mannskor B2.mp3",
+        "Ein deutsches Requiem (Brahms, arr Unander) 4 - Wie lieblich sind deine Wohnungen mannskor T1.mp3",
+        "Ein deutsches Requiem (Brahms, arr Unander) 4 - Wie lieblich sind deine Wohnungen mannskor T2.mp3"
+      ],
+      "pdf": "Ein Deutsches Requiem (Brahms arr Joakim Unander) TTBB - Note.pdf",
+      "tags": [
+        "Konkurranse"
+      ]
+    }
+  ]
+}

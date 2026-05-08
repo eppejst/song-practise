@@ -1,33 +1,53 @@
+/* ---- CSS Custom Properties ---- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand */
+  --color-primary: #4a6cf7;
+  --color-primary-dark: #3a5ce5;
+  --color-danger: #e11d48;
+  --color-success: #16a34a;
+
+  /* Surfaces */
+  --color-bg: #f0f2ff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8f9ff;
+  --color-border: #e2e8f0;
+
+  /* Text */
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+
+  /* Header */
+  --header-height: 60px;
+
+  /* Section colors */
+  --section-colors: #4a6cf7, #16a34a, #ea580c, #e11d48, #7c3aed,
+    #0284c7, #dc2626, #ca8a04, #059669, #ea580c;
+
+  /* Player split */
+  --audio-panel-height: 35%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- Reset ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html,
 body {
-  max-width: 100vw;
+  height: 100%;
   overflow-x: hidden;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
@@ -35,8 +55,15 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
 }

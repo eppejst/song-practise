@@ -1,0 +1,170 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* ---- Header ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+.backBtn {
+  font-size: 22px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  line-height: 1;
+  transition: background 0.1s;
+}
+.backBtn:active {
+  background: var(--color-surface-2);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.voiceSelect {
+  flex-shrink: 0;
+  padding: 6px 28px 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 8px center;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 36px;
+  cursor: pointer;
+  appearance: none;
+}
+
+/* Mode toggle */
+.modeToggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.modeBtn {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.modeBtnActive {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ---- Layout ---- */
+.layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.audioMode .audioPanelWrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheetMode {
+  flex-direction: column;
+}
+
+.sheetMode .pdfPanel {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  touch-action: none;
+}
+
+.sheetMode .audioPanelWrapper {
+  height: var(--audio-panel-height, 35%);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Drag handle */
+.dragHandle {
+  height: 8px;
+  background: var(--color-border);
+  cursor: row-resize;
+  flex-shrink: 0;
+  position: relative;
+  touch-action: none;
+}
+
+.dragHandle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+/* ---- PDF Panel ---- */
+.pdfPanel {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #f8f8f8;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.pdfCanvas {
+  width: 100%;
+}
+
+.pdfLoading,
+.pdfError {
+  padding: 20px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
