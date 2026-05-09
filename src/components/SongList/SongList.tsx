@@ -25,7 +25,7 @@ export default function SongList({ songs }: Props) {
   const filtered = useMemo(() => {
     return songs.filter((s) => {
       if (activeTag && !s.tags?.includes(activeTag)) return false
-      if (searchQuery && !s.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      if (searchQuery && !s.name.normalize('NFC').toLowerCase().includes(searchQuery.normalize('NFC').toLowerCase())) return false
       return true
     })
   }, [songs, activeTag, searchQuery])

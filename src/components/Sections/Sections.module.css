@@ -149,6 +149,19 @@
   color: var(--color-text-muted);
 }
 
+.timeRow {
+  display: flex;
+  gap: 12px;
+}
+
+.timeRow .label {
+  flex: 1;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
 .input,
 .select {
   padding: 10px 12px;

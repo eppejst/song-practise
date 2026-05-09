@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Song, VoicePart } from '@/lib/types'
 import { useAudio } from '@/hooks/useAudio'
 import { useWebAudio } from '@/hooks/useWebAudio'
@@ -35,7 +35,9 @@ export default function AudioPanel({ song, currentPart }: Props) {
   const [speed, setSpeedState] = useState(1)
   const [gainL, setGainL] = useState(1)
   const [gainR, setGainR] = useState(1)
+  const [showStereoPopover, setShowStereoPopover] = useState(false)
   const [editingModalIndex, setEditingModalIndex] = useState<number | null>(null)
+  const stereoRef = useRef<HTMLDivElement>(null)
 
   const { activeLoop } = usePlayerStore()
   const isPlaying = usePlayerStore((s) => s.isPlaying)
@@ -88,6 +90,22 @@ export default function AudioPanel({ song, currentPart }: Props) {
     setChannelGain('R', gr)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPart, song])
+
+  // Close stereo popover on click-outside
+  useEffect(() => {
+    if (!showStereoPopover) return
+    function onOutside(e: MouseEvent | TouchEvent) {
+      if (stereoRef.current && !stereoRef.current.contains(e.target as Node)) {
+        setShowStereoPopover(false)
+      }
+    }
+    document.addEventListener('mousedown', onOutside)
+    document.addEventListener('touchstart', onOutside)
+    return () => {
+      document.removeEventListener('mousedown', onOutside)
+      document.removeEventListener('touchstart', onOutside)
+    }
+  }, [showStereoPopover])
 
   // Track duration
   useEffect(() => {
@@ -191,25 +209,39 @@ export default function AudioPanel({ song, currentPart }: Props) {
             </button>
           ))}
         </div>
-        <div className={styles.stereoControls}>
-          <div className={styles.channelCtrl}>
-            <span>L</span>
-            <input
-              type="range" min="0" max="1" step="0.02"
-              value={gainL}
-              onChange={(e) => handleGainL(Number(e.target.value))}
-              className={styles.channelSlider}
-            />
-          </div>
-          <div className={styles.channelCtrl}>
-            <span>R</span>
-            <input
-              type="range" min="0" max="1" step="0.02"
-              value={gainR}
-              onChange={(e) => handleGainR(Number(e.target.value))}
-              className={styles.channelSlider}
-            />
-          </div>
+        <div className={styles.stereoWrapper} ref={stereoRef}>
+          <button
+            className={`${styles.stereoBtn} ${(gainL !== 1 || gainR !== 1) ? styles.stereoBtnActive : ''}`}
+            onClick={() => setShowStereoPopover((v) => !v)}
+            aria-label="Stereo mix"
+          >
+            🎚 Mix
+          </button>
+          {showStereoPopover && (
+            <div className={styles.stereoPopover}>
+              <div className={styles.stereoPopoverTitle}>Stereo mix</div>
+              <div className={styles.channelCtrl}>
+                <span className={styles.channelLabel}>L</span>
+                <input
+                  type="range" min="0" max="1" step="0.02"
+                  value={gainL}
+                  onChange={(e) => handleGainL(Number(e.target.value))}
+                  className={styles.channelSlider}
+                />
+                <span className={styles.channelValue}>{Math.round(gainL * 100)}%</span>
+              </div>
+              <div className={styles.channelCtrl}>
+                <span className={styles.channelLabel}>R</span>
+                <input
+                  type="range" min="0" max="1" step="0.02"
+                  value={gainR}
+                  onChange={(e) => handleGainR(Number(e.target.value))}
+                  className={styles.channelSlider}
+                />
+                <span className={styles.channelValue}>{Math.round(gainR * 100)}%</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

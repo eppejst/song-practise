@@ -11,6 +11,7 @@ import { assetUrl } from '@/lib/assetUrl'
 import PlayerHeader from './PlayerHeader'
 import PdfPanel from './PdfPanel'
 import AudioPanel from './AudioPanel'
+import { getAudio } from '@/hooks/useAudio'
 import styles from './Player.module.css'
 
 interface Props {
@@ -19,12 +20,16 @@ interface Props {
 
 export default function Player({ song }: Props) {
   const { setCurrentSong, setCurrentPart, setViewMode, viewMode } = usePlayerStore()
-  const { getInitialPart } = usePrefs()
+  const { getInitialPart, saveVoicePref } = usePrefs()
 
   const [parts, setParts] = useState<VoicePart[]>([])
   const [currentPart, setLocalPart] = useState<VoicePart | null>(null)
   const [panelHeight, setPanelHeight] = useState(35) // percent for audio panel in sheet mode
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    return () => { getAudio().pause() }
+  }, [])
 
   useEffect(() => {
     initStorage()
@@ -46,7 +51,8 @@ export default function Player({ song }: Props) {
     const part = parts.find((p) => p.label === label) ?? null
     setLocalPart(part)
     setCurrentPart(part)
-  }, [parts, setCurrentPart])
+    if (part) saveVoicePref(song, part.label)
+  }, [parts, setCurrentPart, saveVoicePref, song])
 
   // Drag handle for resizing audio panel in sheet mode
   const dragging = useRef(false)

@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { Section } from '@/lib/types'
 import { SECTION_COLORS } from '@/hooks/useSections'
 import styles from './Sections.module.css'
@@ -26,9 +27,8 @@ export default function SectionList({ sections, activeLoopIndex, onPlay, onEdit,
   return (
     <ul className={styles.list}>
       {sections.map((sec, i) => (
-        <>
+        <Fragment key={i}>
           <li
-            key={`sec-${i}`}
             className={`${styles.item} ${activeLoopIndex === i ? styles.activeLoop : ''}`}
             onClick={() => onPlay(i)}
           >
@@ -49,13 +49,12 @@ export default function SectionList({ sections, activeLoopIndex, onPlay, onEdit,
             </div>
           </li>
           <div
-            key={`add-${i}`}
             className={styles.addNext}
             onClick={() => onAddAfter(i)}
           >
             <span className={styles.plus}>+</span> Legg til neste seksjon
           </div>
-        </>
+        </Fragment>
       ))}
     </ul>
   )

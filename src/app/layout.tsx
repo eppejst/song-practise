@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     title: 'DnS øveapp',
   },
   icons: {
+    icon: '/logo.png',
     apple: '/logo.png',
   },
 }
